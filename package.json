@@ -1,0 +1,18 @@
+{
+  "name": "receiptbot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Runtime governance + auditing tool for AI agents",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "dev": "pnpm -r run dev",
+    "example:rogue": "tsx examples/rogue-dev.ts",
+    "example:wallet": "tsx examples/wallet-drainer.ts",
+    "clean": "pnpm -r exec rimraf dist"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0",
+    "rimraf": "^5.0.0"
+  }
+}
