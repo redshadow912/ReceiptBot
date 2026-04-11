@@ -40,10 +40,10 @@ export class Receipt {
   readonly events: ReceiptEvent[] = [];
   readonly startedAt: string;
   private endedAt: string | null = null;
-  private _totals: ReceiptTotals = {
+  private _totals: Omit<ReceiptTotals, 'costUsdTotal'> = {
     eventsTotal: 0,
     blockedTotal: 0,
-    costUsdTotal: 0,
+    costCentsTotal: 0,
     durationMs: 0,
   };
   private startTime: number;
@@ -59,6 +59,7 @@ export class Receipt {
   get totals(): ReceiptTotals {
     return {
       ...this._totals,
+      costUsdTotal: this._totals.costCentsTotal / 100,
       durationMs: (this.endedAt ? new Date(this.endedAt).getTime() : Date.now()) - this.startTime,
     };
   }
@@ -104,7 +105,7 @@ export class Receipt {
     if (event.status === 'BLOCKED_BY_POLICY') {
       this._totals.blockedTotal++;
     } else if (event.costImpactUsd) {
-      this._totals.costUsdTotal += event.costImpactUsd;
+      this._totals.costCentsTotal += Math.round(event.costImpactUsd * 100);
     }
 
     this.events.push(event as ReceiptEvent);

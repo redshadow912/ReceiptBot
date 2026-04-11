@@ -11,8 +11,9 @@
     "clean": "pnpm -r exec rimraf dist"
   },
   "devDependencies": {
+    "@types/node": "^25.6.0",
+    "rimraf": "^5.0.0",
     "tsx": "^4.19.0",
-    "typescript": "^5.5.0",
-    "rimraf": "^5.0.0"
+    "typescript": "^5.5.0"
   }
 }

@@ -373,7 +373,7 @@ export function generateHtml(receipt: Receipt, outputPath: string): void {
     ${eventsHtml}
 
     <footer class="footer">
-      Powered by <a href="https://github.com/receiptbot/receiptbot">ReceiptBot</a> &middot; Runtime governance for AI agents
+      Powered by <a href="https://github.com/redshadow912/ReceiptBot">ReceiptBot</a> &middot; Runtime governance for AI agents
     </footer>
   </div>
 </body>
