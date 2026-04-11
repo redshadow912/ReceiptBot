@@ -3,7 +3,10 @@ node_modules/
 dist/
 **/dist/
 .next/
+**/.next/
 out/
+**/out/
+.env*
 coverage/
 *.log
 .DS_Store
