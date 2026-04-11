@@ -144,9 +144,9 @@ export default function ReceiptViewer({ receipt }: { receipt: SerializedReceipt 
   // ── Share snippet ─────────────────────────────────────────────────
   const shareSnippet = useMemo(() => {
     const firstBlocked = events.find(e => e.status === 'BLOCKED_BY_POLICY');
-    let md = `🧾 ReceiptBot: ${totals.eventsTotal} events, ${totals.blockedTotal} blocked, $${totals.costUsdTotal.toFixed(2)} cost, ${totals.durationMs}ms`;
+    let md = `🧾 ReceiptBot: ${totals.eventsTotal} events • ${totals.blockedTotal} blocked • $${totals.costUsdTotal.toFixed(2)} • ${totals.durationMs}ms`;
     if (firstBlocked?.policyTrigger) {
-      md += `\n🛑 Top block: ${firstBlocked.policyTrigger}`;
+      md += `\nTop block: ${firstBlocked.policyTrigger}`;
     }
     return md;
   }, [events, totals]);

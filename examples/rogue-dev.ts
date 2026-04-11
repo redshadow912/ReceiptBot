@@ -6,6 +6,8 @@
 import { PolicyEngine } from '@receiptbot/core';
 import { withReceipts } from '@receiptbot/adapter-generic';
 import { printReceipt, generateHtml } from '@receiptbot/ui';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 async function main() {
   console.log('\n🔥 rogue-dev scenario: agent tries dangerous file operations\n');
@@ -54,7 +56,14 @@ async function main() {
   agent.receipt.finalize();
   printReceipt(agent.receipt);
   generateHtml(agent.receipt, 'receipt-rogue-dev.html');
-  console.log('📄 HTML receipt saved to receipt-rogue-dev.html\n');
+  
+  // Write to viewer samples directory as latest.json
+  const latestPath = path.resolve(process.cwd(), 'apps/viewer/public/samples/latest.json');
+  fs.mkdirSync(path.dirname(latestPath), { recursive: true });
+  fs.writeFileSync(latestPath, JSON.stringify(agent.receipt.toJSON(), null, 2));
+  
+  console.log('📄 HTML receipt saved to receipt-rogue-dev.html');
+  console.log('\n🚀 Open http://localhost:3939/demo/latest to view in UI\n');
 }
 
 main().catch(console.error);
