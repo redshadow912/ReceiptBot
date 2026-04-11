@@ -1,0 +1,86 @@
+{
+  "startedAt": "2026-04-11T00:43:12.228Z",
+  "endedAt": "2026-04-11T00:43:12.229Z",
+  "events": [
+    {
+      "id": "555d013b-a2e4-4e48-b792-9788b7f08f65",
+      "timestamp": "2026-04-11T00:43:12.228Z",
+      "type": "llm.call",
+      "action": "llm.generate(gpt-4-turbo)",
+      "payload": {
+        "model": "gpt-4-turbo",
+        "prompt": "Summarize all customer complaints"
+      },
+      "status": "success",
+      "costImpactUsd": 0.1
+    },
+    {
+      "id": "2734f965-f93f-473e-8c27-081c8b0d2a2b",
+      "timestamp": "2026-04-11T00:43:12.229Z",
+      "type": "llm.call",
+      "action": "llm.generate(gpt-4-turbo)",
+      "payload": {
+        "model": "gpt-4-turbo",
+        "prompt": "Generate marketing copy for Q3"
+      },
+      "status": "success",
+      "costImpactUsd": 0.1
+    },
+    {
+      "id": "15e1b520-e783-4cdc-ba60-d089143ab1dd",
+      "timestamp": "2026-04-11T00:43:12.229Z",
+      "type": "llm.call",
+      "action": "llm.generate(gpt-4-turbo)",
+      "payload": {
+        "model": "gpt-4-turbo",
+        "prompt": "Translate the annual report to Spanish"
+      },
+      "status": "success",
+      "costImpactUsd": 0.1
+    },
+    {
+      "id": "fa7848bf-dc01-4d2b-b861-ad439442e7b2",
+      "timestamp": "2026-04-11T00:43:12.229Z",
+      "type": "llm.call",
+      "action": "llm.generate(gpt-4-turbo)",
+      "payload": {
+        "model": "gpt-4-turbo",
+        "prompt": "Create a sentiment analysis of reviews"
+      },
+      "status": "success",
+      "costImpactUsd": 0.1
+    },
+    {
+      "id": "0c3b3ffd-490b-4e62-8e74-103c4d2d3fb8",
+      "timestamp": "2026-04-11T00:43:12.229Z",
+      "type": "llm.call",
+      "action": "llm.generate(gpt-4-turbo)",
+      "payload": {
+        "model": "gpt-4-turbo",
+        "prompt": "Draft investor presentation slides"
+      },
+      "status": "success",
+      "costImpactUsd": 0.1
+    },
+    {
+      "id": "180db686-44ae-4bde-a56a-e6ccf54fcfb0",
+      "timestamp": "2026-04-11T00:43:12.229Z",
+      "type": "llm.call",
+      "action": "llm.generate(gpt-4-turbo)",
+      "payload": {
+        "model": "gpt-4-turbo",
+        "prompt": "Analyze competitor pricing strategy"
+      },
+      "status": "BLOCKED_BY_POLICY",
+      "costImpactUsd": 0.1,
+      "policyTrigger": "Cost cap exceeded: $0.50 + $0.10 > $0.50"
+    }
+  ],
+  "totals": {
+    "eventsTotal": 6,
+    "blockedTotal": 1,
+    "costCentsTotal": 50,
+    "durationMs": 1,
+    "costUsdTotal": 0.5
+  }
+}

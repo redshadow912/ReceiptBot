@@ -5,7 +5,9 @@
   "description": "Runtime governance + auditing tool for AI agents",
   "scripts": {
     "build": "pnpm -r run build",
-    "dev": "pnpm -r run dev",
+    "dev": "pnpm --filter @receiptbot/viewer dev",
+    "viewer:dev": "pnpm --filter @receiptbot/viewer dev",
+    "viewer:build": "pnpm --filter @receiptbot/viewer build",
     "example:rogue": "tsx examples/rogue-dev.ts",
     "example:wallet": "tsx examples/wallet-drainer.ts",
     "clean": "pnpm -r exec rimraf dist"

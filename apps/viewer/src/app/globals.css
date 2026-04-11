@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Geist fonts via CDN ────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    --font-geist-sans: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-geist-mono: 'Geist Mono', 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-surface-0 text-text-primary;
+    font-family: var(--font-geist-sans);
+    font-feature-settings: "liga" 1;
+  }
+
+  ::selection {
+    background: rgba(0, 112, 243, 0.3);
+    color: #ededed;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+}
+
+@layer components {
+  .stat-card {
+    @apply bg-surface-1 rounded-xl p-5 relative overflow-hidden;
+    box-shadow: 0px 0px 0px 1px rgba(255,255,255,0.06),
+                0px 2px 4px rgba(0,0,0,0.3);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .stat-card:hover {
+    box-shadow: 0px 0px 0px 1px rgba(255,255,255,0.1),
+                0px 4px 12px rgba(0,0,0,0.4);
+    transform: translateY(-1px);
+  }
+
+  .event-card {
+    @apply bg-surface-1 rounded-lg relative;
+    box-shadow: 0px 0px 0px 1px rgba(255,255,255,0.05);
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+  }
+  .event-card:hover {
+    box-shadow: 0px 0px 0px 1px rgba(255,255,255,0.1),
+                0px 2px 8px rgba(0,0,0,0.3);
+    transform: translateX(2px);
+  }
+  .event-card-blocked {
+    border-left: 3px solid #ff4444;
+    background: linear-gradient(90deg, rgba(255,68,68,0.04) 0%, transparent 40%);
+  }
+
+  .pill {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium tracking-wide;
+  }
+
+  .glass-input {
+    @apply bg-surface-2 text-text-primary rounded-lg px-4 py-2.5;
+    box-shadow: inset 0px 0px 0px 1px rgba(255,255,255,0.06);
+    transition: box-shadow 0.2s ease;
+  }
+  .glass-input:focus {
+    outline: none;
+    box-shadow: inset 0px 0px 0px 1px rgba(0,112,243,0.5),
+                0 0 0 3px rgba(0,112,243,0.1);
+  }
+}
