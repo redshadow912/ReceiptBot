@@ -14,3 +14,9 @@ export type {
 
 export { PolicyEngine, type PolicyResult } from './policy-engine.js';
 export { Receipt } from './receipt.js';
+export { PolicyViolationError } from './errors.js';
+export {
+  setupGlobalPatches,
+  teardownGlobalPatches,
+  runWithInterceptors,
+} from './interceptor.js';
