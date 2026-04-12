@@ -52,14 +52,22 @@ export default function LandingPage() {
             </div>
             <span className="text-lg font-semibold tracking-tighter text-text-primary">ReceiptBot</span>
           </div>
-          <a
-            href="https://github.com/redshadow912/ReceiptBot"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-text-tertiary hover:text-text-secondary transition-colors"
-          >
-            GitHub →
-          </a>
+          <div className="flex items-center gap-4">
+            <a
+              href="/docs"
+              className="text-sm text-text-tertiary hover:text-text-secondary transition-colors"
+            >
+              Docs
+            </a>
+            <a
+              href="https://github.com/redshadow912/ReceiptBot"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-text-tertiary hover:text-text-secondary transition-colors"
+            >
+              GitHub →
+            </a>
+          </div>
         </div>
       </header>
 
