@@ -15,7 +15,7 @@
 ---
 
 <!-- Animated demo GIF placeholder -->
-![ReceiptBot Demo](assets/demo.gif)
+![ReceiptBot Demo](assets/demo.webp)
 
 </div>
 

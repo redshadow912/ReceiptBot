@@ -26,6 +26,8 @@ const fsPromisesModule = require('node:fs/promises');
 const httpModule = require('node:http');
 const httpsModule = require('node:https');
 const childProcessModule = require('node:child_process');
+const netModule = require('node:net');
+const tlsModule = require('node:tls');
 
 // ─── Types ──────────────────────────────────────────────────────────
 
@@ -72,6 +74,11 @@ const _origReadFileSync = fsModule.readFileSync;
 const _origWriteFileSync = fsModule.writeFileSync;
 const _origUnlinkSync = fsModule.unlinkSync;
 
+// Callback/Stream FS
+const _origFsReadFileCb = fsModule.readFile;
+const _origFsCreateReadStream = fsModule.createReadStream;
+const _origFsCreateWriteStream = fsModule.createWriteStream;
+
 // Async FS (promises)
 const _origFsReadFile = fsPromisesModule.readFile;
 const _origFsWriteFile = fsPromisesModule.writeFile;
@@ -87,6 +94,14 @@ const _origHttpsGet = httpsModule.get;
 const _origExecSync = childProcessModule.execSync;
 const _origExec = childProcessModule.exec;
 const _origSpawn = childProcessModule.spawn;
+const _origExecFile = childProcessModule.execFile;
+const _origExecFileSync = childProcessModule.execFileSync;
+const _origSpawnSync = childProcessModule.spawnSync;
+
+// net / tls
+const _origNetConnect = netModule.connect;
+const _origNetCreateConnection = netModule.createConnection;
+const _origTlsConnect = tlsModule.connect;
 
 // fetch
 const _origFetch = globalThis.fetch?.bind(globalThis);
@@ -175,6 +190,24 @@ function extractUrlFromHttpArgs(
   return null;
 }
 
+/**
+ * Extract the host/port/path from net.connect / tls.connect arguments.
+ */
+function extractUrlFromNetArgs(protocol: 'tcp' | 'tls', args: any[]): string | null {
+  const first = args[0];
+  if (typeof first === 'object' && first !== null) {
+    const host = first.host || first.hostname || 'localhost';
+    const port = first.port ? `:${first.port}` : '';
+    return `${protocol}://${host}${port}`;
+  } else if (typeof first === 'number') {
+    const host = typeof args[1] === 'string' ? args[1] : 'localhost';
+    return `${protocol}://${host}:${first}`;
+  } else if (typeof first === 'string') {
+    return `${protocol}://unix:${first}`;
+  }
+  return null;
+}
+
 // ─── Patch Functions ────────────────────────────────────────────────
 
 function patchFs(): void {
@@ -204,6 +237,34 @@ function patchFs(): void {
       interceptFs(ctx, 'deleteFile', filePath);
     }
     return withInternalGuard(() => _origUnlinkSync.apply(fsModule, args));
+  };
+
+  // ── Callback / Streams ──
+  fsModule.readFile = function patchedReadFileCb(...args: any[]) {
+    const ctx = getContext();
+    if (ctx) {
+      const filePath = String(args[0]);
+      interceptFs(ctx, 'readFile', filePath);
+    }
+    return withInternalGuard(() => _origFsReadFileCb.apply(fsModule, args));
+  };
+
+  fsModule.createReadStream = function patchedCreateReadStream(...args: any[]) {
+    const ctx = getContext();
+    if (ctx) {
+      const filePath = String(args[0]);
+      interceptFs(ctx, 'readFile', filePath);
+    }
+    return withInternalGuard(() => _origFsCreateReadStream.apply(fsModule, args));
+  };
+
+  fsModule.createWriteStream = function patchedCreateWriteStream(...args: any[]) {
+    const ctx = getContext();
+    if (ctx) {
+      const filePath = String(args[0]);
+      interceptFs(ctx, 'writeFile', filePath);
+    }
+    return withInternalGuard(() => _origFsCreateWriteStream.apply(fsModule, args));
   };
 
   // ── Async (promises) ──
@@ -287,6 +348,57 @@ function patchChildProcess(): void {
     }
     return withInternalGuard(() => _origSpawn.apply(childProcessModule, args));
   };
+
+  childProcessModule.execFile = function patchedExecFile(...args: any[]) {
+    const ctx = getContext();
+    if (ctx) {
+      const command = String(args[0]);
+      interceptShell(ctx, command);
+    }
+    return withInternalGuard(() => _origExecFile.apply(childProcessModule, args));
+  };
+
+  childProcessModule.execFileSync = function patchedExecFileSync(...args: any[]) {
+    const ctx = getContext();
+    if (ctx) {
+      const command = String(args[0]);
+      interceptShell(ctx, command);
+    }
+    return withInternalGuard(() => _origExecFileSync.apply(childProcessModule, args));
+  };
+
+  childProcessModule.spawnSync = function patchedSpawnSync(...args: any[]) {
+    const ctx = getContext();
+    if (ctx) {
+      const command = String(args[0]);
+      const spawnArgs = Array.isArray(args[1]) ? args[1] : undefined;
+      interceptShell(ctx, command, spawnArgs);
+    }
+    return withInternalGuard(() => _origSpawnSync.apply(childProcessModule, args));
+  };
+}
+
+function patchNet(): void {
+  function createPatchedConnect(
+    protocol: 'tcp' | 'tls',
+    originalFn: (...args: any[]) => any,
+    mod: any,
+  ) {
+    return function patchedConnect(this: any, ...args: any[]) {
+      const ctx = getContext();
+      if (ctx) {
+        const url = extractUrlFromNetArgs(protocol, args);
+        if (url) {
+          interceptNet(ctx, 'GET', url); // use GET to satisfy schema
+        }
+      }
+      return withInternalGuard(() => originalFn.apply(mod, args));
+    };
+  }
+
+  netModule.connect = createPatchedConnect('tcp', _origNetConnect, netModule);
+  netModule.createConnection = createPatchedConnect('tcp', _origNetCreateConnection, netModule);
+  tlsModule.connect = createPatchedConnect('tls', _origTlsConnect, tlsModule);
 }
 
 function patchFetch(): void {
@@ -315,6 +427,9 @@ function restoreFs(): void {
   fsModule.readFileSync = _origReadFileSync;
   fsModule.writeFileSync = _origWriteFileSync;
   fsModule.unlinkSync = _origUnlinkSync;
+  fsModule.readFile = _origFsReadFileCb;
+  fsModule.createReadStream = _origFsCreateReadStream;
+  fsModule.createWriteStream = _origFsCreateWriteStream;
   fsPromisesModule.readFile = _origFsReadFile;
   fsPromisesModule.writeFile = _origFsWriteFile;
   fsPromisesModule.unlink = _origFsUnlink;
@@ -331,6 +446,15 @@ function restoreChildProcess(): void {
   childProcessModule.execSync = _origExecSync;
   childProcessModule.exec = _origExec;
   childProcessModule.spawn = _origSpawn;
+  childProcessModule.execFile = _origExecFile;
+  childProcessModule.execFileSync = _origExecFileSync;
+  childProcessModule.spawnSync = _origSpawnSync;
+}
+
+function restoreNet(): void {
+  netModule.connect = _origNetConnect;
+  netModule.createConnection = _origNetCreateConnection;
+  tlsModule.connect = _origTlsConnect;
 }
 
 function restoreFetch(): void {
@@ -350,6 +474,7 @@ export function setupGlobalPatches(): void {
   patchFs();
   patchHttp();
   patchChildProcess();
+  patchNet();
   patchFetch();
   _patched = true;
 }
@@ -362,6 +487,7 @@ export function teardownGlobalPatches(): void {
   restoreFs();
   restoreHttp();
   restoreChildProcess();
+  restoreNet();
   restoreFetch();
   _patched = false;
 }
