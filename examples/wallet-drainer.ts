@@ -1,54 +1,86 @@
 // ─── wallet-drainer.ts ──────────────────────────────────────────────
-// Scenario: An agent loops LLM calls at $0.10 each until it blows
-//           past the $0.50 cost cap → blocked by cost policy.
+// Scenario: An autonomous agent loops until it hits your budget limits.
+// Expected: The 4th task pushes it over the $0.05 limit and is blocked.
 // ─────────────────────────────────────────────────────────────────────
 
-import { PolicyEngine } from '@receiptbot/core';
-import { withReceipts } from '@receiptbot/adapter-generic';
-import { printReceipt, generateHtml } from '@receiptbot/ui';
+import { PolicyEngine, Receipt, runWithInterceptors, teardownGlobalPatches } from '@receiptbot/core';
+import { printReceipt } from '@receiptbot/ui';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+
+// ANSI Colors
+const boldLine = '\x1b[1m\x1b[31m';
+const green = '\x1b[32m';
+const yellow = '\x1b[33m';
+const cyan = '\x1b[36m';
+const reset = '\x1b[0m';
+
+async function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 async function main() {
-  console.log('\n💸 wallet-drainer scenario: agent loops LLM calls until cost cap hit\n');
+  console.log('\n💸 wallet-drainer scenario (V2): an autonomous agent hits your budget limits\n');
 
-  // Set up policies — cap spending at $0.50
+  // Set up policies — cap spending at a hard $0.0500
   const policy = new PolicyEngine()
-    .maxCost(0.50);
+    .maxCost(0.05);
 
-  // Create governed agent
-  const agent = withReceipts(policy);
+  const receipt = new Receipt(policy);
 
-  // ── Agent actions ────────────────────────────────────────────────
+  console.log(`🤖 Agent: "Starting deep research task. Going to spawn sub-agents to parallelize work..."`);
+  await sleep(1500);
 
-  const prompts = [
-    'Summarize all customer complaints',
-    'Generate marketing copy for Q3',
-    'Translate the annual report to Spanish',
-    'Create a sentiment analysis of reviews',
-    'Draft investor presentation slides',
-    'Analyze competitor pricing strategy',
-    'Write a blog post about AI governance',
-    'Rewrite the terms of service',
-    'Generate test data for load testing',
-    'Summarize all Slack messages from last week',
+  // In a real app, `runWithInterceptors` wraps your LangChain/OpenAI calls
+  // so that node:https requests are caught. Here, we manually emit LLM events 
+  // to the receipt to explicitly showcase the precision cost tracking.
+
+  const tasks = [
+    { prompt: 'Researching recent AI papers on Arxiv...', cost: 0.0150 },
+    { prompt: 'Generating vector embeddings for 100 documents...', cost: 0.0125 },
+    { prompt: 'Summarizing dense legal texts for context...', cost: 0.0200 },
+    { prompt: 'Writing the final extensive 10,000 word report...', cost: 0.0300 },
   ];
 
-  for (let i = 0; i < prompts.length; i++) {
-    const result = await agent.llm.generate('gpt-4-turbo', prompts[i], 0.10);
+  await runWithInterceptors(policy, receipt, async () => {
+    for (let i = 0; i < tasks.length; i++) {
+        await sleep(1000);
+        console.log(`\n${cyan}Agent → Requesting GPT-4-Turbo (${tasks[i].prompt})${reset}`);
+        
+        // Simulating the LLM api call firing an event
+        const event = receipt.addEvent({
+            type: 'llm.call',
+            action: 'llm.generate(gpt-4-turbo)',
+            payload: { model: 'gpt-4-turbo', prompt: tasks[i].prompt },
+            costImpactUsd: tasks[i].cost
+        });
 
-    if (result.blocked) {
-      console.log(`  🛑 Call ${i + 1} blocked: ${result.reason}`);
-      break;
-    } else {
-      console.log(`  ✅ Call ${i + 1} succeeded — running total: $${agent.receipt.totals.costUsdTotal.toFixed(2)}`);
+        if (event.status === 'BLOCKED_BY_POLICY') {
+            console.log(`  ${boldLine}[ReceiptBot] ✗ BLOCKED_BY_POLICY: llm.generate(gpt-4-turbo)${reset}`);
+            console.log(`  ${yellow}⚠ ${event.policyTrigger}${reset}`);
+            console.log(`  ${yellow}Agent execution gracefully halted due to budget limits.${reset}`);
+            break; // Stop the loop!
+        } else {
+            console.log(`  ${green}✓ Success! Cost: $${tasks[i].cost.toFixed(4)}${reset} (Running total: $${receipt.totals.costUsdTotal.toFixed(4)})`);
+        }
     }
-  }
+  });
 
   // ── Finalize & output ───────────────────────────────────────────
+  teardownGlobalPatches();
+  receipt.finalize();
 
-  agent.receipt.finalize();
-  printReceipt(agent.receipt);
-  generateHtml(agent.receipt, 'receipt-wallet-drainer.html');
-  console.log('📄 HTML receipt saved to receipt-wallet-drainer.html\n');
+  await sleep(1500);
+  console.log('\n----------------------------------------------------');
+  printReceipt(receipt);
+
+  // Write to viewer samples directory as latest.json
+  const latestPath = path.resolve(process.cwd(), 'apps/viewer/public/samples/latest.json');
+  fs.mkdirSync(path.dirname(latestPath), { recursive: true });
+  fs.writeFileSync(latestPath, JSON.stringify(receipt.toJSON(), null, 2));
+
+  console.log('\n📄 JSON receipt saved to apps/viewer/public/samples/latest.json');
+  console.log('🚀 Open http://localhost:3939/demo/latest to view in UI\n');
 }
 
 main().catch(console.error);

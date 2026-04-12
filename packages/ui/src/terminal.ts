@@ -78,7 +78,7 @@ export function printReceipt(receipt: Receipt): void {
     const ts = new Date(event.timestamp).toISOString().slice(11, 23);
     const status = statusColor(event.status);
     const type  = typeColor(event.type);
-    const cost = event.costImpactUsd != null ? ` ${dim}($${event.costImpactUsd.toFixed(2)})${reset}` : '';
+    const cost = event.costImpactUsd != null ? ` ${dim}($${event.costImpactUsd.toFixed(4)})${reset}` : '';
 
     console.log(`${cyan}${V}${reset} ${dim}${ts}${reset}  ${type}  ${status}${cost}`);
     console.log(`${cyan}${V}${reset}   ${dim}→${reset} ${event.action}`);

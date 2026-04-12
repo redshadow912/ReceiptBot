@@ -49,7 +49,7 @@ export function generateHtml(receipt: Receipt, outputPath: string): void {
             <span class="event-ts">${ts}</span>
           </div>
           <div class="event-right">
-            ${e.costImpactUsd != null ? `<span class="event-cost">$${e.costImpactUsd.toFixed(2)}</span>` : ''}
+            ${e.costImpactUsd != null ? `<span class="event-cost">$${e.costImpactUsd.toFixed(4)}</span>` : ''}
             ${statusBadge(e.status)}
           </div>
         </div>

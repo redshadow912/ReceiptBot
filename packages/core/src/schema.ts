@@ -75,7 +75,7 @@ export interface ReceiptEvent<T extends ReceiptEventType = ReceiptEventType> {
 export interface ReceiptTotals {
   eventsTotal: number;
   blockedTotal: number;
-  costCentsTotal: number;
+  costMicroUsdTotal: number;
   costUsdTotal: number; // Derived for display
   durationMs: number;
 }

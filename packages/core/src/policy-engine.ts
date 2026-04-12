@@ -18,13 +18,13 @@ export class PolicyEngine {
 
   /** Block execution once cumulative USD cost exceeds `amountUsd`. */
   maxCost(amountUsd: number): this {
-    const amountCents = Math.round(amountUsd * 100);
+    const amountMicroUsd = Math.round(amountUsd * 1_000_000);
     this.rules.push((_event, ctx) => {
-      const eventCents = Math.round((_event.costImpactUsd ?? 0) * 100);
-      if (ctx.totals.costCentsTotal + eventCents > amountCents) {
+      const eventMicroUsd = Math.round((_event.costImpactUsd ?? 0) * 1_000_000);
+      if (ctx.totals.costMicroUsdTotal + eventMicroUsd > amountMicroUsd) {
         return {
           allowed: false,
-          reason: `Cost cap exceeded: $${(ctx.totals.costCentsTotal / 100).toFixed(2)} + $${(eventCents / 100).toFixed(2)} > $${(amountCents / 100).toFixed(2)}`,
+          reason: `Cost cap exceeded: $${(ctx.totals.costMicroUsdTotal / 1_000_000).toFixed(4)} + $${(eventMicroUsd / 1_000_000).toFixed(4)} > $${(amountMicroUsd / 1_000_000).toFixed(4)}`,
         };
       }
       return null;
