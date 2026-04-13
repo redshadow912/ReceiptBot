@@ -4,7 +4,7 @@
 
 ### A Flight Recorder and Seatbelt for Node.js AI Agents.
 
-*Monkey-patching isn't a hard OS sandbox — but ReceiptBot is your in-process flight recorder. It intercepts rogue `fs` reads, caps LLM spend, and redacts secrets before they leak.*
+*Monkey-patching isn't a hard OS sandbox — ReceiptBot is not trying to be one. It's your in-process flight recorder: a structured audit trail of every I/O operation, a cost governor that cuts off runaway LLM loops, and a secret scrubber that runs before any log is written. All of it drops into your existing Node.js project in one function call.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![pnpm](https://img.shields.io/badge/pnpm-workspace-orange)](https://pnpm.io)
@@ -358,6 +358,8 @@ receiptbot/
 
 ---
 
+---
+
 ## Privacy & Security
 
 - **Secret redaction** happens at event-record time — before JSON, terminal output, or HTML generation
@@ -365,6 +367,64 @@ receiptbot/
 - **No telemetry** — ReceiptBot never phones home
 
 ---
+
+## Design Philosophy & Honest Limitations
+
+Senior engineers will ask hard questions. Here are honest answers.
+
+### "Why not just use Deno's `--allow-read` / `--allow-net`?"
+
+Deno's permission flags are a real OS-level sandbox backed by V8 — they are *more secure* than anything a Node.js library can do with monkey-patching. If you are building a greenfield agent from scratch and Deno is on the table, **use Deno's flags**. They are the better technical choice for isolation.
+
+ReceiptBot exists for a different reason: **90% of production AI agent work happens inside existing Node.js monorepos** where migrating the runtime is not an option. Deno also doesn't give you a structured audit receipt, per-run cost caps, or forensic secret redaction out of the box. ReceiptBot is an observability and governance layer — not a VM jail.
+
+The correct mental model: Deno flags are like an airport security scanner. ReceiptBot is like the flight's black box recorder. Both matter. They're not the same tool.
+
+### "Monkey-patching is maintenance hell — what if Node adds `fs.promises.readLines`?"
+
+This is completely fair. Node.js does add new APIs, and if a new method bypasses the patched surface, there is a real gap. **ReceiptBot is not a 100%-coverage sandbox** and does not claim to be.
+
+The patching approach is identical to what Datadog dd-trace, New Relic, and OpenTelemetry use in production for billions of requests. They maintain compatibility tables and ship updates when Node adds new APIs. ReceiptBot follows the same model.
+
+What's patched today is documented explicitly in the [Architecture section](#the-architecture-v2). If a new API is added to Node that matters for your threat model, [open an issue](https://github.com/redshadow912/ReceiptBot/issues) or submit a PR — the surface area is small and additions are straightforward.
+
+### "What about Redis / Postgres connection pools established before `runWithInterceptors`?"
+
+This is the sharpest limitation and worth being explicit about.
+
+`AsyncLocalStorage` propagates through async continuations that are *created inside* the `runWithInterceptors` call. If a Postgres pool is initialized at server startup — outside any ALS context — queries made through that pool from inside your agent will **not** carry the agent's receipt context. The socket was established before the ALS cell existed.
+
+What ReceiptBot *does* catch: the **connection establishment** itself (`net.connect`, `tls.connect`, `https.request`). If an agent tries to open a *new* connection to an unexpected host, that is intercepted and can be blocked. What it does *not* catch: data packets flowing through a long-lived socket that was opened before the governance context started.
+
+For long-lived database connections, the correct pattern is:
+
+```typescript
+// ✅ Create the pool INSIDE the interceptor context
+await runWithInterceptors(policy, receipt, async () => {
+  const pool = new Pool({ host: 'localhost' }); // connection caught
+  await pool.query('SELECT 1');
+});
+
+// ⚠️ Pools created at module init time are NOT under ALS governance:
+const pool = new Pool(); // established before any agent run
+await runWithInterceptors(policy, receipt, async () => {
+  await pool.query('...');  // ALS context is undefined for this socket
+});
+```
+
+This limitation is acknowledged, documented, and on the roadmap for long-lived socket tracing.
+
+---
+
+## Who is ReceiptBot for?
+
+ReceiptBot is the right tool if you answer yes to all three:
+
+1. **You are running AI agents in Node.js** (not Deno, not a browser sandbox, not a Docker-only environment)
+2. **You cannot afford a runaway agent** — either financially (token costs) or professionally (data exfiltration from a compromised prompt)
+3. **You need a paper trail** — for debugging, for compliance, for incident reports, or for explaining to your team what an agent actually did during a run
+
+If your primary concern is OS-level isolation and you control the runtime, use Deno's permission flags or run your agent in a locked-down container. ReceiptBot is for the teams that don't have that luxury, and need governance and observability *today*, inside the codebase they already have.
 
 ## Contributing
 
