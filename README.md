@@ -370,8 +370,6 @@ receiptbot/
 
 ## Design Philosophy & Honest Limitations
 
-Senior engineers will ask hard questions. Here are honest answers.
-
 ### "Why not just use Deno's `--allow-read` / `--allow-net`?"
 
 Deno's permission flags are a real OS-level sandbox backed by V8 — they are *more secure* than anything a Node.js library can do with monkey-patching. If you are building a greenfield agent from scratch and Deno is on the table, **use Deno's flags**. They are the better technical choice for isolation.
