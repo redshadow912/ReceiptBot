@@ -11,6 +11,7 @@
     "demo:rogue": "tsx examples/rogue-dev.ts",
     "example:rogue": "tsx examples/rogue-dev.ts",
     "example:wallet": "tsx examples/wallet-drainer.ts",
+    "demo:unprotected": "tsx examples/unprotected-rogue.ts",
     "example:interceptor": "tsx examples/interceptor-demo.ts",
     "clean": "pnpm -r exec rimraf dist"
   },
