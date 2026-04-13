@@ -9,7 +9,7 @@ export default function DemoWalletDrainerPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/samples/receipt-wallet-drainer.json')
+    fetch('/samples/receipt-budget-runaway.json')
       .then(res => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();

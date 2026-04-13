@@ -32,13 +32,13 @@ async function main() {
   console.log(`${red}${simulatedEnvFile}${reset}`);
 
   await sleep(1500);
-  console.log(`\n🤖 Agent: "Opening raw TCP connection to evil-exfiltration.io..."`);
+  console.log(`\n🤖 Agent: "Opening raw TCP connection to untrusted-external.com..."`);
   await sleep(1000);
 
-  console.log(`${dim}Agent → Requesting net.connect('evil-exfiltration.io')${reset}`);
+  console.log(`${dim}Agent → Requesting net.connect('untrusted-external.com')${reset}`);
   await sleep(1200);
   
-  console.log(`${red}✓ TCP SOCKET OPENED: Established stream to evil-exfiltration.io:443${reset}`);
+  console.log(`${red}✓ TCP SOCKET OPENED: Established stream to untrusted-external.com:443${reset}`);
   await sleep(800);
   console.log(`${red}✓ DATA STOLEN: Successfully POSTed 85 bytes of environment variables.${reset}`);
   
