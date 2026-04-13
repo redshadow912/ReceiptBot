@@ -1,7 +1,7 @@
-// ─── unprotected-rogue.ts ──────────────────────────────────────────
-// Scenario: A rogue agent is hijacked via prompt injection.
-// Expected: file operations and raw TCP sockets SUCCEED because
-// ReceiptBot is NOT wrapping this run.
+// ─── no-protection-demo.ts ──────────────────────────────────────────────
+// Educational demo: What a prompt-hijacked agent can do when there is
+// NO policy engine wrapping the Node.js process.
+// Compare with rogue-dev.ts where the same agent is stopped cold.
 // ───────────────────────────────────────────────────────────────────
 
 import { createRequire } from 'node:module';

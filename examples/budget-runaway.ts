@@ -1,6 +1,6 @@
-// ─── wallet-drainer.ts ──────────────────────────────────────────────
-// Scenario: An autonomous agent loops until it hits your budget limits.
-// Expected: The 4th task pushes it over the $0.05 limit and is blocked.
+// ─── budget-runaway.ts ──────────────────────────────────────────────
+// Scenario: An autonomous agent loops expensive LLM calls until
+// ReceiptBot's cost cap kicks in and halts execution.
 // ─────────────────────────────────────────────────────────────────────
 
 import { PolicyEngine, Receipt, runWithInterceptors, teardownGlobalPatches } from '@receiptbot/core';
@@ -20,7 +20,7 @@ async function sleep(ms: number) {
 }
 
 async function main() {
-  console.log('\n💸 wallet-drainer scenario (V2): an autonomous agent hits your budget limits\n');
+  console.log('\n💸 budget-runaway scenario: agent loops LLM calls until the cost cap halts it\n');
 
   // Set up policies — cap spending at a hard $0.0500
   const policy = new PolicyEngine()

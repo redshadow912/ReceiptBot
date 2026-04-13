@@ -74,7 +74,7 @@ function EventRow({ event, index }: { event: ReceiptEvent; index: number }) {
         <div className="flex items-center gap-2.5 flex-shrink-0">
           {event.costImpactUsd != null && (
             <span className="font-mono text-xs text-status-failed bg-status-failed/10 px-2 py-0.5 rounded">
-              ${event.costImpactUsd.toFixed(4)}
+              ${(event.costImpactUsd || 0).toFixed(4)}
             </span>
           )}
           <StatusPill status={event.status} />
@@ -144,7 +144,7 @@ export default function ReceiptViewer({ receipt }: { receipt: SerializedReceipt 
   // ── Share snippet ─────────────────────────────────────────────────
   const shareSnippet = useMemo(() => {
     const firstBlocked = events.find(e => e.status === 'BLOCKED_BY_POLICY');
-    let md = `🧾 ReceiptBot: ${totals.eventsTotal} events • ${totals.blockedTotal} blocked • $${totals.costUsdTotal.toFixed(4)} • ${totals.durationMs}ms`;
+    let md = `🧾 ReceiptBot: ${totals.eventsTotal} events • ${totals.blockedTotal} blocked • $${(totals.costUsdTotal || 0).toFixed(4)} • ${totals.durationMs}ms`;
     if (firstBlocked?.policyTrigger) {
       md += `\nTop block: ${firstBlocked.policyTrigger}`;
     }
@@ -251,7 +251,7 @@ export default function ReceiptViewer({ receipt }: { receipt: SerializedReceipt 
                 <span className="text-xs text-text-tertiary uppercase tracking-wider font-medium">Total Cost</span>
               </div>
               <p className="text-3xl font-semibold tracking-tighter text-status-failed tabular-nums">
-                ${totals.costUsdTotal.toFixed(4)}
+                ${(totals.costUsdTotal || 0).toFixed(4)}
               </p>
             </div>
 

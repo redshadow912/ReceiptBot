@@ -111,7 +111,7 @@ pnpm install
 pnpm run demo:rogue
 
 # Demo 2: Agent loops LLM calls until budget limit is hit
-pnpm run example:wallet
+pnpm run example:budget
 
 # Start the visual audit UI on http://localhost:3939
 pnpm run dev
@@ -324,7 +324,7 @@ receiptbot/
 │       └── public/samples/         Bundled demo receipt JSON files
 └── examples/
     ├── rogue-dev.ts                Agent hijacked → .env blocked, evil domain blocked
-    ├── wallet-drainer.ts           Agent loops → stopped at $0.05 budget
+    ├── budget-runaway.ts           Agent loops → stopped at $0.05 budget
     └── interceptor-demo.ts         Raw syscall interception showcase
 ```
 

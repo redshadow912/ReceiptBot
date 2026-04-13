@@ -10,8 +10,8 @@
     "viewer:build": "pnpm --filter @receiptbot/viewer build",
     "demo:rogue": "tsx examples/rogue-dev.ts",
     "example:rogue": "tsx examples/rogue-dev.ts",
-    "example:wallet": "tsx examples/wallet-drainer.ts",
-    "demo:unprotected": "tsx examples/unprotected-rogue.ts",
+    "example:budget": "tsx examples/budget-runaway.ts",
+    "demo:no-protection": "tsx examples/no-protection-demo.ts",
     "example:interceptor": "tsx examples/interceptor-demo.ts",
     "clean": "pnpm -r exec rimraf dist"
   },
