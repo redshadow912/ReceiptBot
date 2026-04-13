@@ -319,7 +319,7 @@ receiptbot/
 │       │   ├── docs/page.tsx       Full documentation & tutorial
 │       │   └── demo/
 │       │       ├── rogue-dev/      Prompt injection demo
-│       │       ├── wallet-drainer/ Cost cap demo
+│       │       ├── budget-runaway/ Cost cap demo
 │       │       └── latest/         Last receipt from pnpm demo:rogue
 │       └── public/samples/         Bundled demo receipt JSON files
 └── examples/

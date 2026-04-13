@@ -557,7 +557,7 @@ console.log(\`Cost so far: \$\${receipt.totals.costUsdTotal.toFixed(4)}\`);`} />
             <div className="space-y-3 mt-4">
               {[
                 { title: 'Drag & Drop Upload', desc: 'Drag any receipt.json onto the landing page to view it. Data is stored in localStorage only — nothing is transmitted anywhere.' },
-                { title: 'Bundled Demo Receipts', desc: 'Visit /demo/rogue-dev or /demo/wallet-drainer to explore pre-baked receipts showing both governance scenarios.' },
+                { title: 'Bundled Demo Receipts', desc: 'Visit /demo/rogue-dev or /demo/budget-runaway to explore pre-baked receipts showing both governance scenarios.' },
                 { title: 'Event Timeline', desc: 'Every event is shown in chronological order with its type, timestamp, cost, and status badge. Blocked events are highlighted in red.' },
                 { title: 'JSON Drill-Down', desc: 'Click any event row to expand its full typed payload, including any redacted fields shown with forensic labels.' },
                 { title: 'Filter & Search', desc: 'Filter by status (All / Blocked / Success / Failed) and full-text search across actions, types, and policy triggers.' },

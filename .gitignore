@@ -10,3 +10,6 @@ out/
 coverage/
 *.log
 .DS_Store
+
+# Ignore dynamic demo receipts
+apps/viewer/public/samples/latest.json

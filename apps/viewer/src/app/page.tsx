@@ -148,7 +148,7 @@ export default function LandingPage() {
                 </div>
               </a>
               <a
-                href="/demo/wallet-drainer"
+                href="/demo/budget-runaway"
                 className="group flex items-center gap-3 px-5 py-3.5 rounded-lg bg-surface-1 hover:bg-surface-2 transition-all"
                 style={{ boxShadow: '0px 0px 0px 1px rgba(255,255,255,0.06)' }}
               >
