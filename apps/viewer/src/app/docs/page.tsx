@@ -433,9 +433,22 @@ writeFileSync('my-receipt.json', JSON.stringify(json, null, 2));`} />
               <h2 className="text-2xl font-semibold tracking-tight text-text-primary">Add to Your Project</h2>
             </div>
             <p className="text-text-secondary leading-relaxed mb-4">
-              The minimal integration is three steps: define a policy, create a receipt, wrap your agent in <code className="text-accent-blue bg-surface-2 px-1 py-0.5 rounded text-xs">runWithInterceptors</code>.
+              The minimal integration is three steps: patch early, define a policy, and wrap your agent in <code className="text-accent-blue bg-surface-2 px-1 py-0.5 rounded text-xs">runWithInterceptors</code>.
             </p>
-            <CodeBlock lang="typescript" code={`import {
+            <Callout type="warning">
+              <strong>ESM Note:</strong> Static <code>import</code> statements execute before runtime code. You cannot call <code>setupGlobalPatches()</code> after importing other modules in the same file. Use a dedicated entrypoint script that patches first, then dynamically imports the rest of your app.
+            </Callout>
+            <CodeBlock lang="typescript" code={`// entrypoint.ts
+import { setupGlobalPatches } from '@receiptbot/core';
+
+// 1. Patch FIRST (opt-in to strict mode if desired)
+setupGlobalPatches({ requireContext: true });
+
+// 2. Dynamically import the rest of your app
+await import('./main.js');`} />
+            <div className="my-6 border-b border-border/20" />
+            <CodeBlock lang="typescript" code={`// main.ts
+import {
   PolicyEngine,
   Receipt,
   runWithInterceptors,
@@ -695,6 +708,53 @@ interface ReceiptTotals {
                     <tr key={mod} className="border-b border-border/20 last:border-0">
                       <td className="py-3 pr-6 font-mono text-xs text-accent-blue whitespace-nowrap">{mod}</td>
                       <td className="py-3 text-xs text-text-secondary font-mono">{methods}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Section>
+
+          {/* Threat Model Boundary */}
+          <Section id="threat-model">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-8 h-8 rounded-lg bg-status-failed/10 flex items-center justify-center">
+                <AlertTriangle size={16} className="text-status-failed" />
+              </div>
+              <h2 className="text-2xl font-semibold tracking-tight text-text-primary">Threat Model Boundary</h2>
+            </div>
+            
+            <Callout type="warning">
+              <strong>Pragmatic, not bulletproof.</strong> Monkey-patching is an application-level seatbelt, not a hard OS-level sandbox. If you control your deployment infrastructure, Deno or Bun native runtime permissions (<code>--allow-read</code>) are strictly superior security boundaries. ReceiptBot provides governance for the 90% of us stuck in existing Node.js monorepos who can&apos;t easily migrate runtimes.
+            </Callout>
+
+            <p className="text-text-secondary leading-relaxed mb-4 mt-6">
+              Tools like <a href="https://hermeticsys.com" target="_blank" rel="noopener noreferrer" className="text-accent-blue hover:underline">Hermetic</a> take a complementary approach: credentials live in an encrypted daemon and agents receive opaque handles instead of raw secrets. ReceiptBot + Hermetic is defense in depth — Hermetic ensures <code>.env</code> contains nothing sensitive, ReceiptBot audits unexpected runtime behavior.
+            </p>
+
+            <p className="text-text-secondary leading-relaxed mb-4">
+              To be fully transparent, here are the known escape surfaces where an agent could theoretically bypass ReceiptBot&apos;s patching. All of these require specific Node.js APIs or circumstances.
+            </p>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border/40">
+                    <th className="text-left text-xs uppercase tracking-wider text-text-tertiary pb-3 pr-6 font-medium">Escape Vector</th>
+                    <th className="text-left text-xs uppercase tracking-wider text-text-tertiary pb-3 font-medium">Status / Mitigation</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ['vm.runInNewContext()', 'Document only. Gets fresh unpatched builtins. Unfixable from userland JS.'],
+                    ['N-API native addons', 'Document only. Can call libuv directly. Unfixable from userland JS.'],
+                    ['process.binding(\'fs\')', 'Document only. Deprecated internal C++ binding. Behavior varies by Node version.'],
+                    ['Pre-patch captured references', 'Mitigated by patching early using a dedicated entrypoint script. See Add to Your Project section.'],
+                    ['setTimeout without ALS context', 'Mitigated by opt-in Strict Mode which forces fail-closed blocks outside an active runWithInterceptors scope.']
+                  ].map(([vector, status]) => (
+                    <tr key={vector} className="border-b border-border/20 last:border-0">
+                      <td className="py-3 pr-6 font-mono text-xs text-status-failed whitespace-nowrap">{vector}</td>
+                      <td className="py-3 text-xs text-text-secondary">{status}</td>
                     </tr>
                   ))}
                 </tbody>

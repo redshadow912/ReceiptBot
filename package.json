@@ -12,6 +12,7 @@
     "example:rogue": "tsx examples/rogue-dev.ts",
     "example:budget": "tsx examples/budget-runaway.ts",
     "demo:no-protection": "tsx examples/no-protection-demo.ts",
+    "example:strict-mode": "tsx examples/strict-mode-test.ts",
     "example:interceptor": "tsx examples/interceptor-demo.ts",
     "clean": "pnpm -r exec rimraf dist"
   },

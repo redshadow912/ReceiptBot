@@ -390,7 +390,24 @@ What's patched today is documented explicitly in the [Architecture section](#the
 
 This is the sharpest limitation and worth being explicit about.
 
-`AsyncLocalStorage` propagates through async continuations that are *created inside* the `runWithInterceptors` call. If a Postgres pool is initialized at server startup — outside any ALS context — queries made through that pool from inside your agent will **not** carry the agent's receipt context. The socket was established before the ALS cell existed.
+`AsyncLocalStorage` propagates through async continuations that are *created inside* the `runWithInterceptors` call. To integrate ReceiptBot smoothly with standard frontend frameworks (Next.js, Vite, Nest), call `runWithInterceptors` in your background job handlers or standard API routes. You must ensure you apply the global patches as early as possible.
+
+### ESM Best Practice: Patch Early
+
+Because ES Modules evaluate static `import` statements before runtime code executes, you cannot call `setupGlobalPatches()` between imports. You must use a dedicated entrypoint if you want to ensure all downstream modules use patched versions.
+
+```ts
+// entrypoint.ts (Run this file directly)
+import { setupGlobalPatches } from '@receiptbot/core';
+
+// 1. Patch FIRST
+setupGlobalPatches({ requireContext: true }); // opt-in to strict mode
+
+// 2. Dynamically import the rest of your app
+await import('./main.js');
+```
+
+If a Postgres pool is initialized at server startup — outside any ALS context — queries made through that pool from inside your agent will **not** carry the agent's receipt context. The socket was established before the ALS cell existed.
 
 What ReceiptBot *does* catch: the **connection establishment** itself (`net.connect`, `tls.connect`, `https.request`). If an agent tries to open a *new* connection to an unexpected host, that is intercepted and can be blocked. What it does *not* catch: data packets flowing through a long-lived socket that was opened before the governance context started.
 
@@ -411,6 +428,24 @@ await runWithInterceptors(policy, receipt, async () => {
 ```
 
 This limitation is acknowledged, documented, and on the roadmap for long-lived socket tracing.
+
+---
+
+## Threat Model Boundary
+
+> **Pragmatic, not bulletproof.** Monkey-patching is an application-level seatbelt, not a hard OS-level sandbox. If you control your deployment infrastructure, Deno or Bun native runtime permissions (`--allow-read`) are strictly superior security boundaries. ReceiptBot provides governance for the 90% of us stuck in existing Node.js monorepos who can't easily migrate runtimes.
+>
+> Tools like [Hermetic](https://hermeticsys.com) take a complementary approach: credentials live in an encrypted daemon and agents receive opaque handles instead of raw secrets. ReceiptBot + Hermetic is defense in depth — Hermetic ensures `.env` contains nothing sensitive, ReceiptBot audits unexpected runtime behavior.
+
+To be fully transparent, here are the known escape surfaces where an agent could theoretically bypass ReceiptBot's patching. All of these require specific Node.js APIs or circumstances.
+
+| Escape Vector | Status |
+|---|---|
+| `vm.runInNewContext()` | Document only. Gets fresh unpatched builtins. Unfixable from userland JS. |
+| N-API native addons | Document only. Can call libuv directly. Unfixable from userland JS. |
+| `process.binding('fs')` | Document only. Deprecated internal C++ binding. Behavior varies by Node version. |
+| Pre-patch captured references | Mitigated by patching early. If a dependency caches `readFileSync = require('fs')` before your `setupGlobalPatches()` call, that reference is unpatched. See **Best Practices** below. |
+| `setTimeout` without ALS context | Mitigation: Opt-in **Strict Mode** forces fail-closed blocks outside an active `runWithInterceptors` scope. |
 
 ---
 
